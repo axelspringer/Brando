@@ -24,7 +24,7 @@ Resources:
             Path: /
             Method: get
 
-  CodePipelineNotifyDynamoDBRolePolicy: 
+  BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
     Properties: 
       PolicyName: !Join [ "-", [ !Ref ProjectId, "dynamodb" ] ]
@@ -39,11 +39,11 @@ Resources:
               - "dynamodb:Scan"
               - "dynamodb:DescribeTable"
             Resource:
-              - !GetAtt CodePipelineNotifyDynamoDBTable.Arn
+              - !GetAtt BrandoDynamoDBTable.Arn
       Roles: 
         - !Join [ "-", [ !Ref ProjectId, "lambda" ] ]
 
-  CodePipelineNotifyDynamoDBTable: 
+  BrandoDynamoDBTable: 
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions: 
