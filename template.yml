@@ -24,6 +24,23 @@ Resources:
             Path: /
             Method: get
 
+BrandoCFRolePolicy: 
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: !Join [ "-", [ !Ref ProjectId, "cf" ] ]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action:
+              - "iam:DeleteRolePolicy"
+              - "iam:PutRolePolicy"
+            Resource:
+              - '*'
+      Roles: 
+        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "CloudFormation" ] ]
+  
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
     Properties: 
