@@ -23,3 +23,58 @@ Resources:
           Properties:
             Path: /
             Method: get
+
+  CodePipelineNotifyDynamoDBRolePolicy: 
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: !Join [ "-", [ !Ref ProjectId, "dynamodb" ] ]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+              - "dynamodb:DescribeTable"
+            Resource:
+              - !GetAtt CodePipelineNotifyDynamoDBTable.Arn
+      Roles: 
+        - !Join [ "-", [ !Ref ProjectId, "lambda" ] ]
+
+  CodePipelineNotifyDynamoDBTable: 
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "Title"
+          AttributeType: "S"
+        -
+          AttributeName: "DateBegin"
+          AttributeType: "S"
+        -
+          AttributeName: "DateEnd"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "Titel"
+          KeyType: "HASH"
+        -
+          AttributeName: "DateBegin"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: GlobalBrandoIndex
+          KeySchema:
+            -
+              AttributeName: "DateEnd"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
