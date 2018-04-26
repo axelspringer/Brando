@@ -46,35 +46,36 @@ Resources:
   CodePipelineNotifyDynamoDBTable: 
     Type: AWS::DynamoDB::Table
     Properties:
-      AttributeDefinitions:
-        -
-          AttributeName: "Title"
+      AttributeDefinitions: 
+        - 
+          AttributeName: "Titel"
           AttributeType: "S"
-        -
+        - 
           AttributeName: "DateBegin"
           AttributeType: "S"
-        -
+        - 
           AttributeName: "DateEnd"
           AttributeType: "S"
-      KeySchema:
-        -
+      KeySchema: 
+        - 
           AttributeName: "Titel"
           KeyType: "HASH"
-        -
+        - 
           AttributeName: "DateBegin"
           KeyType: "RANGE"
-      GlobalSecondaryIndexes:
-        -
-          IndexName: GlobalBrandoIndex
-          KeySchema:
-            -
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "BrandoTable"
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "GlobalBrandoIndex"
+          KeySchema: 
+            - 
               AttributeName: "DateEnd"
-              KeyType: "RANGE"
-          Projection:
+              KeyType: "HASH"
+          Projection: 
             ProjectionType: "KEYS_ONLY"
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
