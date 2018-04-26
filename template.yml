@@ -53,8 +53,8 @@ Resources:
           - 
             Effect: "Allow"
             Action:
-              - "iam:DeletePolicyRole"
-              - "iam:PutPolicyRole"
+              - "iam:DeleteRolePolicy"
+              - "iam:PutRolePolicy"
             Resource:
               - "*"
       Roles: 
