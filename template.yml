@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: "2010-09-09"
 Transform:
 - AWS::Serverless-2016-10-31
 - AWS::CodeStar
@@ -24,23 +24,6 @@ Resources:
             Path: /
             Method: get
 
-BrandoCFRolePolicy: 
-    Type: AWS::IAM::Policy
-    Properties: 
-      PolicyName: !Join [ "-", [ !Ref ProjectId, "cf" ] ]
-      PolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - 
-            Effect: "Allow"
-            Action:
-              - "iam:DeleteRolePolicy"
-              - "iam:PutRolePolicy"
-            Resource:
-              - '*'
-      Roles: 
-        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "CloudFormation" ] ]
-  
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
     Properties: 
@@ -59,6 +42,23 @@ BrandoCFRolePolicy:
               - !GetAtt BrandoDynamoDBTable.Arn
       Roles: 
         - !Join [ "-", [ !Ref ProjectId, "lambda" ] ]
+
+  BrandoCFRolePolicy: 
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: !Join [ "-", [ !Ref ProjectId, "cf" ] ]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action:
+              - "iam:DeletePolicyRole"
+              - "iam:PutPolicyRole"
+            Resource:
+              - "*"
+      Roles: 
+        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "CloudFormation" ] ]
 
   BrandoDynamoDBTable: 
     Type: AWS::DynamoDB::Table
