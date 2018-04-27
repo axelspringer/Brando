@@ -41,7 +41,7 @@ Resources:
             Resource:
               - !GetAtt BrandoDynamoDBTable.Arn
       Roles: 
-        - !Join [ "-", [ !Ref ProjectId, "lambda" ] ]
+        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "Lambda" ] ]
 
   BrandoCFRolePolicy: 
     Type: AWS::IAM::Policy
