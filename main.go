@@ -18,7 +18,7 @@ type LiveEvent struct {
 	Titel string`json:"title"`
 	Presentor string`json:"presentor"`
 	Description string`json:"description"`
-    DateBegin string`json:"datebegin"`
+    	DateBegin string`json:"datebegin"`
 	DateEnd string`json:"dateend"`
 	Live bool`json:"live"`
 	Featured bool`json:"featured"`
@@ -31,7 +31,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	fmt.Println("Received body: ", request.Body)
 
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
+		Region: aws.String("eu-west-1")},
 	)
 	
 	// Create DynamoDB client
