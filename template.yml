@@ -22,7 +22,7 @@ Resources:
           Type: Api
           Properties:
             Path: /
-            Method: get
+            Method: post
 
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
