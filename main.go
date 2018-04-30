@@ -18,10 +18,16 @@ type LiveEvent struct {
 	Titel string`json:"Titel"`
 	Presentor string`json:"Presentor"`
 	Description string`json:"Description"`
-    	DateBegin string`json:"DateBegin"`
+    DateBegin string`json:"DateBegin"`
 	DateEnd string`json:"DateEnd"`
 	Live bool`json:"Live"`
 	Featured bool`json:"Featured"`
+}
+
+//Error Struct 
+type Error struct {
+	Msg string
+	Err string
 }
 
 // Handler is executed by AWS Lambda in the main function. Once the request
@@ -43,7 +49,9 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		fmt.Println("Got error parsing JSON:")
 		fmt.Println(err.Error())
-		return events.APIGatewayProxyResponse{Body: "Inconsistent input", StatusCode: 400}, nil
+		err := Error{"Inconsistent input", err.Error()}
+		data, _ := json.Marshal(err);
+		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
 	}
 	fmt.Println(liveEvent, err)
 
