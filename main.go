@@ -41,6 +41,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var liveEvent LiveEvent
 	
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
+	
+	fmt.Println(liveEvent, err)
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
 
