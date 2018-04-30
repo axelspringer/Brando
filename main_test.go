@@ -24,4 +24,17 @@ func TestHandler(t *testing.T) {
 	assert.Contains(t, response.Body, expectedResponse.Body)
 	assert.Equal(t, err, nil)
 
+	request = events.APIGatewayProxyRequest{}
+	request.HTTPMethod = "GET"
+	request.Body = ""
+	expectedResponse = events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body: "GET",
+	}
+
+	response, err = Handler(request)
+
+	assert.Contains(t, response.Body, expectedResponse.Body)
+	assert.Equal(t, err, nil)
+
 }

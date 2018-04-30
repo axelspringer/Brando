@@ -18,11 +18,14 @@ Resources:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       Events:
-        GetEvent:
-          Type: Api
-          Properties:
-            Path: /
-            Method: post
+         - http:
+         path: /
+         method: get
+         cors: true
+         - http:
+         path: /
+         method: post
+         cors: true
 
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
