@@ -57,14 +57,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	_, err = svc.PutItem(input)
 	
 	if err != nil {
+		return events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 200}, nil
 		fmt.Println("Got error calling PutItem:")
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	
-	fmt.Println("Successfully added 'The Big New Movie' (2015) to Movies table")
 
-	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+	return events.APIGatewayProxyResponse{Body: "Success", StatusCode: 200}, nil
 
 }
 
