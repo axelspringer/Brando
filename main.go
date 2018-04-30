@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -37,16 +38,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
-	liveEvent := LiveEvent{
-		Titel: "The Big New Movie",
-		Presentor: "Jan Michalowsky",
-		Description: "Test Event",
-		DateBegin: "2018-30-04 12:00",
-		DateEnd: "2018-30-04 12:30",
-		Live: true,
-		Featured: true,
-	}
+	var liveEvent LiveEvent
 	
+	err = json.Unmarshal([]byte(request.Body), &liveEvent)
+
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
 
 	input := &dynamodb.PutItemInput{
