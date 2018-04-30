@@ -41,7 +41,12 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var liveEvent LiveEvent
 	
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
-	
+	if err != nil {
+		fmt.Println("Got error parsing JSON:")
+		fmt.Println(err.Error())
+		return events.APIGatewayProxyResponse{Body: "Inconsistent input", StatusCode: 400}, nil
+		os.Exit(1)	
+	}
 	fmt.Println(liveEvent, err)
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
@@ -56,6 +61,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		fmt.Println("Got error calling PutItem:")
 		fmt.Println(err.Error())
+		return events.APIGatewayProxyResponse{Body: "Could not insert item into database", StatusCode: 400}, nil
 		os.Exit(1)
 	}
 	
