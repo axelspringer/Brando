@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -16,9 +15,27 @@ import (
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	switch request.HTTPMethod {
+    case "GET":
+        return show(request)
+    case "POST":
+        return create(request)
+    default:
+        return clientError()
+    }
+}
 
-	fmt.Println("Received body: ", request.Body)
+func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       "GET",
+		Headers: map[string]string{
+			"Content-Type": "text/html",
+		},
+	}, nil
+}
 
+func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("eu-west-1")},
 	)
@@ -30,13 +47,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
-		fmt.Println("Got error parsing JSON:")
-		fmt.Println(err.Error())
 		err := Error{"Inconsistent input", err.Error()}
 		data, _ := json.Marshal(err);
 		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
 	}
-	fmt.Println(liveEvent, err)
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
 
@@ -48,15 +62,19 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	_, err = svc.PutItem(input)
 	
 	if err != nil {
-		fmt.Println("Got error calling PutItem:")
-		fmt.Println(err.Error())
 		err := Error{"Could not insert item into database", err.Error()}
 		data, _ := json.Marshal(err);
 		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
 	}
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+}
 
+func clientError() (events.APIGatewayProxyResponse, error) {
+    return events.APIGatewayProxyResponse{
+        StatusCode: 404,
+        Body:       "ERROR",
+    }, nil
 }
 
 func main() {
