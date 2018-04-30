@@ -45,7 +45,6 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		fmt.Println("Got error parsing JSON:")
 		fmt.Println(err.Error())
 		return events.APIGatewayProxyResponse{Body: "Inconsistent input", StatusCode: 400}, nil
-		os.Exit(1)	
 	}
 	fmt.Println(liveEvent, err)
 
@@ -62,7 +61,6 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		fmt.Println("Got error calling PutItem:")
 		fmt.Println(err.Error())
 		return events.APIGatewayProxyResponse{Body: "Could not insert item into database", StatusCode: 400}, nil
-		os.Exit(1)
 	}
 	
 	fmt.Println("Successfully added 'The Big New Movie' (2015) to Movies table")
