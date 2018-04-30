@@ -15,13 +15,13 @@ import (
 
 //LiveEvent Struct
 type LiveEvent struct {
-	Titel string`json:"title"`
-	Presentor string`json:"presentor"`
-	Description string`json:"description"`
-    	DateBegin string`json:"datebegin"`
-	DateEnd string`json:"dateend"`
-	Live bool`json:"live"`
-	Featured bool`json:"featured"`
+	Titel string`json:"Titel"`
+	Presentor string`json:"Presentor"`
+	Description string`json:"Description"`
+    	DateBegin string`json:"DateBegin"`
+	DateEnd string`json:"DateEnd"`
+	Live bool`json:"Live"`
+	Featured bool`json:"Featured"`
 }
 
 // Handler is executed by AWS Lambda in the main function. Once the request
