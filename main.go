@@ -54,8 +54,6 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		data, _ := json.Marshal(err);
 		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
 	}
-	
-	fmt.Println("Successfully added 'The Big New Movie' (2015) to Movies table")
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 
