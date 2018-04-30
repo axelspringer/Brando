@@ -13,23 +13,6 @@ import (
     "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-//LiveEvent Struct
-type LiveEvent struct {
-	Titel string`json:"Titel"`
-	Presentor string`json:"Presentor"`
-	Description string`json:"Description"`
-    DateBegin string`json:"DateBegin"`
-	DateEnd string`json:"DateEnd"`
-	Live bool`json:"Live"`
-	Featured bool`json:"Featured"`
-}
-
-//Error Struct 
-type Error struct {
-	Msg string
-	Err string
-}
-
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -67,10 +50,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		fmt.Println("Got error calling PutItem:")
 		fmt.Println(err.Error())
-		return events.APIGatewayProxyResponse{Body: "Could not insert item into database", StatusCode: 400}, nil
+		err := Error{"Could not insert item into database", err.Error()}
+		data, _ := json.Marshal(err);
+		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
 	}
-	
-	fmt.Println("Successfully added 'The Big New Movie' (2015) to Movies table")
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 

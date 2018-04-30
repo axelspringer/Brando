@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -9,17 +11,15 @@ import (
 func TestHandler(t *testing.T) {
 
 	request := events.APIGatewayProxyRequest{}
+	data, _ := json.Marshal(LiveEvent{Titel: "Awesome Event", Presentor: "Bob", Description: "An aweseomne event I guess", DateBegin: "2018-05-01 12:00", DateEnd: "2018-05-01 12:30", Live: true, Featured: true })
+	request.Body = string(data)
 	expectedResponse := events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Headers: map[string]string{
-			"Content-Type": "text/html",
-		},
-		Body: "Congratulations",
+		Body: string(data),
 	}
 
 	response, err := Handler(request)
 
-	assert.Equal(t, response.Headers, expectedResponse.Headers)
 	assert.Contains(t, response.Body, expectedResponse.Body)
 	assert.Equal(t, err, nil)
 
