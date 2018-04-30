@@ -16,7 +16,7 @@ Resources:
       Runtime: go1.x
       Role:
         Fn::ImportValue:
-          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+          !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "Lambda" ] ]
       Events:
         GetEvent:
           Type: Api
@@ -34,6 +34,7 @@ Resources:
           - 
             Effect: "Allow"
             Action:
+              - "dynamodb:PutItem"
               - "dynamodb:GetItem"
               - "dynamodb:Query"
               - "dynamodb:Scan"
