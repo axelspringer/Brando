@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -21,21 +22,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
     case "POST":
         return create(request)
     default:
-        return clientError()
+		return clientError(
+			Error{"Unsupported http method",
+			""}, 404)
     }
 }
 
-func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Body:       "GET",
-		Headers: map[string]string{
-			"Content-Type": "text/html",
-		},
-	}, nil
-}
-
-func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func getSession() (*dynamodb.DynamoDB, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("eu-west-1")},
 	)
@@ -43,13 +36,53 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
+	return svc, err
+}
+
+func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	svc, err := getSession()
+
+	params := &dynamodb.ScanInput{
+		TableName: aws.String("BrandoTable"),
+		}
+
+	result, err := svc.Scan(params)
+	if err != nil {
+	fmt.Printf("failed to make Query API call, %v", err)
+	} 
+
+	obj := []LiveEvent{}
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &obj)
+	if err != nil {
+	fmt.Printf("failed to unmarshal Query result items, %v", err)
+	}
+
+	data, err := json.Marshal(obj)
+	if err != nil {
+        panic (err)
+    }
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       string(data),
+		Headers: map[string]string{
+			"Content-Type": "text/html",
+		},
+	}, nil
+}
+
+func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	
+	svc, err := getSession()
+
 	var liveEvent LiveEvent
 	
+	//unmarshal request body to LiveEvent obj
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
 		err := Error{"Inconsistent input", err.Error()}
-		data, _ := json.Marshal(err);
-		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
+		clientError(err, 400)
 	}
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
@@ -63,17 +96,17 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	
 	if err != nil {
 		err := Error{"Could not insert item into database", err.Error()}
-		data, _ := json.Marshal(err);
-		return events.APIGatewayProxyResponse{Body: string(data), StatusCode: 400}, nil
+		clientError(err, 500)
 	}
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 }
 
-func clientError() (events.APIGatewayProxyResponse, error) {
+func clientError(err Error, code int) (events.APIGatewayProxyResponse, error) {
+	data, _ := json.Marshal(err);
     return events.APIGatewayProxyResponse{
-        StatusCode: 404,
-        Body:       "ERROR",
+        StatusCode: code,
+        Body:       string(data),
     }, nil
 }
 
