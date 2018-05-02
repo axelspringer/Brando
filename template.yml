@@ -19,13 +19,11 @@ Resources:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       events:
          - http:
-         path: /show
-         method: get
-         cors: true
+          path: /create
+          method: GET
          - http:
          path: /put
-         method: post
-         cors: true
+         method: POST
 
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
