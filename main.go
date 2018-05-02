@@ -67,7 +67,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 		StatusCode: 200,
 		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type": "text/html",
+			"Content-Type": "application/json",
 		},
 	}, nil
 }
@@ -82,7 +82,7 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
 		err := Error{"Inconsistent input", err.Error()}
-		clientError(err, 400)
+		return clientError(err, 400)
 	}
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
@@ -96,7 +96,7 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	
 	if err != nil {
 		err := Error{"Could not insert item into database", err.Error()}
-		clientError(err, 500)
+		return clientError(err, 500)
 	}
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
