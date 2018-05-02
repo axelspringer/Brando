@@ -17,13 +17,13 @@ Resources:
       Role:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
-      Events:
+      events:
          - http:
-         path: /
+         path: /show
          method: get
          cors: true
          - http:
-         path: /
+         path: /put
          method: post
          cors: true
 
