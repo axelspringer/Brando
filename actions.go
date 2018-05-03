@@ -49,7 +49,7 @@ func getEventByID(i int) (*LiveEvent, error) {
 		   ComparisonOperator: aws.String("EQ"),
 			AttributeValueList:     []*dynamodb.AttributeValue{
 			   {
-				N: aws.String(string(i)),
+				N: i,
 				},
 			  },
 			},
