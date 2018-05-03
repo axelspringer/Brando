@@ -18,11 +18,16 @@ Resources:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       Events:
+        GetEvents:
+          Type: Api
+          Properties:
+            Path: /events
+            Method: get
         GetEvent:
           Type: Api
           Properties:
-            Path: /
-            Method: any
+            Path: /events/{event}
+            Method: get
 
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
@@ -43,6 +48,7 @@ Resources:
               - !GetAtt BrandoDynamoDBTable.Arn
       Roles: 
         - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "Lambda" ] ]
+
 
   BrandoCFRolePolicy: 
     Type: AWS::IAM::Policy
