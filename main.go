@@ -65,7 +65,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       string(data),
+		Body:       string(data) + request.PathParameters[0],
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
