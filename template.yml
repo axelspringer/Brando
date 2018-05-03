@@ -23,6 +23,11 @@ Resources:
           Properties:
             Path: /events
             Method: get
+        PostEvent:
+          Type: Api
+          Properties:
+            Path: /events
+            Method: post
         GetEvent:
           Type: Api
           Properties:
