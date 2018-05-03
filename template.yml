@@ -72,8 +72,8 @@ Resources:
     Properties:
       AttributeDefinitions: 
         - 
-          AttributeName: "Titel"
-          AttributeType: "S"
+          AttributeName: "ID"
+          AttributeType: "N"
         - 
           AttributeName: "DateBegin"
           AttributeType: "S"
@@ -82,7 +82,7 @@ Resources:
           AttributeType: "S"
       KeySchema: 
         - 
-          AttributeName: "Titel"
+          AttributeName: "ID"
           KeyType: "HASH"
         - 
           AttributeName: "DateBegin"

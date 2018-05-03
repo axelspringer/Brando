@@ -7,10 +7,6 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 
-    "github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/service/dynamodb"
-    "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 // Handler is executed by AWS Lambda in the main function. Once the request
@@ -28,51 +24,33 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
     }
 }
 
-func getSession() (*dynamodb.DynamoDB, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("eu-west-1")},
-	)
-	
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
-	return svc, err
-}
 
 func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	svc, err := getSession()
-
-	params := &dynamodb.ScanInput{
-		TableName: aws.String("BrandoTable"),
-		}
-
-	result, err := svc.Scan(params)
-	if err != nil {
-		err := Error{"Query failed", err.Error()}
-		return clientError(err, 500)
-	} 
-
-	obj := []LiveEvent{}
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &obj)
-	if err != nil {
-		err := Error{"Unexpected error", err.Error()}
-		return clientError(err, 500)
-	}
-
 	var data []byte
+	var err error
 
-	if eventN, err := strconv.Atoi(request.PathParameters["event"]); err == nil {
-		item := obj[eventN]
+	if eventID, err := strconv.Atoi(request.PathParameters["event"]); err == nil {
+		item, err := getEventByID(eventID)
+		if err != nil {
+			err := Error{"Unexpected error", err.Error()}
+			return clientError(err, 500)
+		}
 		data, err = json.Marshal(item)
 	} else {
+		obj, err := scanDB()
+		if err != nil {
+			err := Error{"Unexpected error", err.Error()}
+			return clientError(err, 500)
+		}
 		data, err = json.Marshal(obj)
 	}
 
 	if err != nil {
         err := Error{"Unexpected error", err.Error()}
 		return clientError(err, 500)
-    }
+	}
+	
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Body:       string(data) + request.Path,
@@ -83,33 +61,18 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 }
 
 func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	
-	svc, err := getSession()
-
 	var liveEvent LiveEvent
 	
 	// Unmarshal request body to LiveEvent obj
-	err = json.Unmarshal([]byte(request.Body), &liveEvent)
+	err := json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
 		err := Error{"Inconsistent input", err.Error()}
 		return clientError(err, 400)
 	}
 
-	av, err := dynamodbattribute.MarshalMap(liveEvent)
-	if err != nil {
-		err := Error{"Unexpected error", err.Error()}
+	if err = putItem(liveEvent); err != nil {
+		err := Error{"Unexpected Error", err.Error()}
 		return clientError(err, 400)
-	}
-
-	input := &dynamodb.PutItemInput{
-		Item: av,
-		TableName: aws.String("BrandoTable"),
-	}
-	
-	_, err = svc.PutItem(input)
-	if err != nil {
-		err := Error{"Could not insert item into database", err.Error()}
-		return clientError(err, 500)
 	}
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
