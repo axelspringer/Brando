@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"strconv"
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -49,20 +49,30 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 
 	result, err := svc.Scan(params)
 	if err != nil {
-	fmt.Printf("failed to make Query API call, %v", err)
+		err := Error{"Query failed", err.Error()}
+		return clientError(err, 500)
 	} 
 
 	obj := []LiveEvent{}
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &obj)
 	if err != nil {
-	fmt.Printf("failed to unmarshal Query result items, %v", err)
+		err := Error{"Unexpected error", err.Error()}
+		return clientError(err, 500)
 	}
 
-	data, err := json.Marshal(obj)
-	if err != nil {
-        panic (err)
-    }
+	var data []byte
 
+	if eventN, err := strconv.Atoi(request.PathParameters["event"]); err == nil {
+		item := obj[eventN]
+		data, err = json.Marshal(item)
+	} else {
+		data, err = json.Marshal(obj)
+	}
+
+	if err != nil {
+        err := Error{"Unexpected error", err.Error()}
+		return clientError(err, 500)
+    }
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Body:       string(data) + request.Path,
@@ -78,7 +88,7 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 
 	var liveEvent LiveEvent
 	
-	//unmarshal request body to LiveEvent obj
+	// Unmarshal request body to LiveEvent obj
 	err = json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
 		err := Error{"Inconsistent input", err.Error()}
@@ -86,6 +96,10 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	}
 
 	av, err := dynamodbattribute.MarshalMap(liveEvent)
+	if err != nil {
+		err := Error{"Unexpected error", err.Error()}
+		return clientError(err, 400)
+	}
 
 	input := &dynamodb.PutItemInput{
 		Item: av,
@@ -93,7 +107,6 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	}
 	
 	_, err = svc.PutItem(input)
-	
 	if err != nil {
 		err := Error{"Could not insert item into database", err.Error()}
 		return clientError(err, 500)
