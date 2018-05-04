@@ -9,7 +9,7 @@ Parameters:
     Description: AWS CodeStar projectID used to associate new resources to team members
 
 Resources:
-  GetHelloWorld:
+  TortugaLive:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main
@@ -50,7 +50,7 @@ Resources:
               - "dynamodb:Scan"
               - "dynamodb:DescribeTable"
             Resource:
-              - !GetAtt BrandoDynamoDBTable.Arn
+              - !Join [ !GetAtt BrandoDynamoDBTable.Arn, "/*"]
       Roles: 
         - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "Lambda" ] ]
 
@@ -78,9 +78,12 @@ Resources:
       AttributeDefinitions: 
         - 
           AttributeName: "ID"
-          AttributeType: "S"
+          AttributeType: "N"
         - 
           AttributeName: "DateBegin"
+          AttributeType: "S"
+        - 
+          AttributeName: "DateEnd"
           AttributeType: "S"
       KeySchema: 
         - 
