@@ -20,7 +20,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
     default:
 		return clientError(
 			Error{"Unsupported http method",
-			""}, 404)
+			""}, 400)
     }
 }
 
