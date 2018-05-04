@@ -38,7 +38,7 @@ func scanDB() (*[]LiveEvent, error) {
 	return &obj, nil
 }
 
-func getEventByID(s string) (*LiveEvent, error) {
+func getEventByID(s string) (*[]LiveEvent, error) {
 	svc, err := getSession()
 
 	params := &dynamodb.QueryInput{
@@ -58,7 +58,7 @@ func getEventByID(s string) (*LiveEvent, error) {
 	if err != nil {
 		return nil, err
 	} 
-	liveEvent := LiveEvent{}
+	liveEvent := []LiveEvent{}
 	err = dynamodbattribute.UnmarshalListOfMaps(resp.Items,  &liveEvent)
 	if err == nil {
 		return &liveEvent, nil
