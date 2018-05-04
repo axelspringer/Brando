@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -48,7 +50,7 @@ func getEventByID(i int) (*[]LiveEvent, error) {
 		   ComparisonOperator: aws.String("EQ"),
 			AttributeValueList:     []*dynamodb.AttributeValue{
 			   {
-				N: aws.String(string(i)),
+				N: aws.String(strconv.Itoa(i)),
 				},
 			  },
 			},
