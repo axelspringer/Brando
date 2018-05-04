@@ -78,7 +78,7 @@ Resources:
       AttributeDefinitions: 
         - 
           AttributeName: "ID"
-          AttributeType: "N"
+          AttributeType: "S"
         - 
           AttributeName: "DateBegin"
           AttributeType: "S"

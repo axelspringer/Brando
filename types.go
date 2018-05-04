@@ -1,8 +1,13 @@
 package main
 
-//LiveEvent Struct
+//ULiveEvent ... a unique LiveEvent with an uuid
+type ULiveEvent struct {
+	ID string`json:"ID"`
+	LiveEvent
+}
+
+//LiveEvent struct
 type LiveEvent struct {
-	ID int`json:"ID"`
 	Titel string`json:"Titel"`
 	Presentor string`json:"Presentor"`
 	Description string`json:"Description"`

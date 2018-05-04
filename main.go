@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"encoding/json"
-	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -21,7 +20,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
     default:
 		return clientError(
 			Error{"Unsupported http method",
-			""}, 404)
+			""}, 400)
     }
 }
 
@@ -32,7 +31,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	var err error
 
 	fmt.Println("GET request on " + request.Path + " event: " + request.PathParameters["event"] + ".")
-	if eventID, err := strconv.Atoi(request.PathParameters["event"]); err == nil {
+	if eventID := request.PathParameters["event"]; &eventID != nil && eventID != "" {
 		item, err := getEventByID(eventID)
 		if err != nil {
 			err := Error{"An unexpected error occured during query", err.Error()}
