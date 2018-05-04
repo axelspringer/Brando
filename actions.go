@@ -43,7 +43,6 @@ func getEventByID(s string) (*LiveEvent, error) {
 
 	params := &dynamodb.QueryInput{
 		TableName: aws.String("BrandoTable"),
-		IndexName: aws.String("GlobalBrandoIndex"),
 		KeyConditions: map[string]*dynamodb.Condition{
 		 "ID": {
 		   ComparisonOperator: aws.String("EQ"),
