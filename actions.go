@@ -7,9 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
-func getSession() (*dynamodb.DynamoDB, error) {
+const (
+	defaultDynamoDBTable = "BrandoTable"
+	defaultDynamoDBRegion = "eu-west-1"
+)
+
+var (
+	dbService,_ = getService()
+)
+
+func getService() (*dynamodb.DynamoDB, error) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("eu-west-1")},
+		Region: aws.String(defaultDynamoDBRegion)},
 	)
 
 	svc := dynamodb.New(sess)
@@ -18,13 +27,11 @@ func getSession() (*dynamodb.DynamoDB, error) {
 }
 
 func scanDB() (*[]ULiveEvent, error) {
-	svc, err := getSession()
-
 	params := &dynamodb.ScanInput{
-		TableName: aws.String("BrandoTable"),
+		TableName: aws.String(defaultDynamoDBTable),
 		}
 
-	result, err := svc.Scan(params)
+	result, err := dbService.Scan(params)
 	if err != nil {
 		return nil, err
 	} 
@@ -39,11 +46,9 @@ func scanDB() (*[]ULiveEvent, error) {
 }
 
 func getEventByID(s string) (*[]ULiveEvent, error) {
-	svc, err := getSession()
-
 	//Define query parameters, search by given ID
 	params := &dynamodb.QueryInput{
-		TableName: aws.String("BrandoTable"),
+		TableName: aws.String(defaultDynamoDBTable),
 		KeyConditions: map[string]*dynamodb.Condition{
 		 "ID": {
 		   ComparisonOperator: aws.String("EQ"),
@@ -55,7 +60,7 @@ func getEventByID(s string) (*[]ULiveEvent, error) {
 			},
 		   },
 		 }
-	resp, err := svc.Query(params)
+	resp, err := dbService.Query(params)
 	if err != nil {
 		return nil, err
 	} 
@@ -68,8 +73,6 @@ func getEventByID(s string) (*[]ULiveEvent, error) {
 }
 
 func putItem(liveEvent LiveEvent) error {
-	svc, err := getSession()
-
 	//Generate new uuid and append it to liveEvent
 	uuid, err := newUUID()
 	if err != nil {
@@ -84,10 +87,10 @@ func putItem(liveEvent LiveEvent) error {
 
 	input := &dynamodb.PutItemInput{
 		Item: av,
-		TableName: aws.String("BrandoTable"),
+		TableName: aws.String(defaultDynamoDBTable),
 	}
 	
-	_, err = svc.PutItem(input)
+	_, err = dbService.PutItem(input)
 	if err != nil {
 		return err
 	}

@@ -2,31 +2,29 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"encoding/json"
+	"errors"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-
 )
 
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
-    case "GET":
+    case http.MethodGet:
         return show(request)
-    case "POST":
+    case http.MethodPost:
         return create(request)
     default:
-		return clientError(
-			Error{"Unsupported http method",
-			""}, 400)
+		return clientError("Unsupported http method", 400)
     }
 }
 
 
 func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	var data []byte
 	var err error
 
@@ -34,22 +32,22 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	if eventID := request.PathParameters["event"]; &eventID != nil && eventID != "" {
 		item, err := getEventByID(eventID)
 		if err != nil {
-			err := Error{"An unexpected error occured during query", err.Error()}
-			return clientError(err, 500)
+			fmt.Println(err.Error())
+			return clientError("An unexpected error occured during query", 500)
 		}
 		data, err = json.Marshal(item)
 	} else {
 		obj, err := scanDB()
 		if err != nil {
-			err := Error{"An unexpected error occured during scan", err.Error()}
-			return clientError(err, 500)
+			fmt.Println(err.Error())
+			return clientError("An unexpected error occured during scan", 500)
 		}
 		data, err = json.Marshal(obj)
 	}
 
 	if err != nil {
-        err := Error{"An unexpected error occured while parsing", err.Error()}
-		return clientError(err, 500)
+		fmt.Println(err.Error())
+		return clientError("An unexpected error occured while parsing", 500)
 	}
 	
 	return events.APIGatewayProxyResponse{
@@ -67,19 +65,20 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	// Unmarshal request body to LiveEvent obj
 	err := json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
-		err := Error{"Inconsistent input", err.Error()}
-		return clientError(err, 400)
+		fmt.Println(err.Error())
+		return clientError("Inconsistent input", 400)
 	}
 
 	if err = putItem(liveEvent); err != nil {
-		err := Error{"An unexpected error occured during put request", err.Error()}
-		return clientError(err, 400)
+		fmt.Println(err.Error())
+		return clientError("An unexpected error occured during put request", 400)
 	}
 
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 }
 
-func clientError(err Error, code int) (events.APIGatewayProxyResponse, error) {
+func clientError(errStr string, code int) (events.APIGatewayProxyResponse, error) {
+	err := errors.New(errStr)
 	data, _ := json.Marshal(err);
     return events.APIGatewayProxyResponse{
         StatusCode: code,

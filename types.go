@@ -17,8 +17,4 @@ type LiveEvent struct {
 	Featured bool`json:"Featured"`
 }
 
-//Error Struct 
-type Error struct {
-	Msg string
-	Err string
-}
+
