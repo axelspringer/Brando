@@ -31,7 +31,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	var err error
 
 	fmt.Println("GET request on " + request.Path + " event: " + request.PathParameters["event"] + ".")
-	if eventID := request.PathParameters["event"]; &eventID != nil {
+	if eventID := request.PathParameters["event"]; &eventID != nil && eventID != "" {
 		item, err := getEventByID(eventID)
 		if err != nil {
 			err := Error{"An unexpected error occured during query", err.Error()}
