@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -29,24 +30,25 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	var data []byte
 	var err error
 
+	fmt.Println("GET request on " + request.Path + " event: " + request.PathParameters["event"] + ".")
 	if eventID := request.PathParameters["event"]; &eventID != nil {
 		item, err := getEventByID(eventID)
 		if err != nil {
-			err := Error{"Unexpected error", err.Error()}
+			err := Error{"An unexpected error occured during query", err.Error()}
 			return clientError(err, 500)
 		}
 		data, err = json.Marshal(item)
 	} else {
 		obj, err := scanDB()
 		if err != nil {
-			err := Error{"Unexpected error", err.Error()}
+			err := Error{"An unexpected error occured during scan", err.Error()}
 			return clientError(err, 500)
 		}
 		data, err = json.Marshal(obj)
 	}
 
 	if err != nil {
-        err := Error{"Unexpected error", err.Error()}
+        err := Error{"An unexpected error occured while parsing", err.Error()}
 		return clientError(err, 500)
 	}
 	
@@ -70,7 +72,7 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	}
 
 	if err = putItem(liveEvent); err != nil {
-		err := Error{"Unexpected Error", err.Error()}
+		err := Error{"An unexpected error occured during put request", err.Error()}
 		return clientError(err, 400)
 	}
 
