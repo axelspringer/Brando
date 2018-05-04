@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -19,7 +17,7 @@ func getSession() (*dynamodb.DynamoDB, error) {
 	return svc, err
 }
 
-func scanDB() (*[]LiveEvent, error) {
+func scanDB() (*[]ULiveEvent, error) {
 	svc, err := getSession()
 
 	params := &dynamodb.ScanInput{
@@ -31,7 +29,7 @@ func scanDB() (*[]LiveEvent, error) {
 		return nil, err
 	} 
 
-	obj := []LiveEvent{}
+	obj := []ULiveEvent{}
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &obj)
 	if err != nil {
 		return nil, err
@@ -40,9 +38,10 @@ func scanDB() (*[]LiveEvent, error) {
 	return &obj, nil
 }
 
-func getEventByID(i int) (*[]LiveEvent, error) {
+func getEventByID(s string) (*[]ULiveEvent, error) {
 	svc, err := getSession()
 
+	//Define query parameters, search by given ID
 	params := &dynamodb.QueryInput{
 		TableName: aws.String("BrandoTable"),
 		KeyConditions: map[string]*dynamodb.Condition{
@@ -50,7 +49,7 @@ func getEventByID(i int) (*[]LiveEvent, error) {
 		   ComparisonOperator: aws.String("EQ"),
 			AttributeValueList:     []*dynamodb.AttributeValue{
 			   {
-				N: aws.String(strconv.Itoa(i)),
+				S: aws.String(s),
 				},
 			  },
 			},
@@ -60,7 +59,7 @@ func getEventByID(i int) (*[]LiveEvent, error) {
 	if err != nil {
 		return nil, err
 	} 
-	liveEvent := []LiveEvent{}
+	liveEvent := []ULiveEvent{}
 	err = dynamodbattribute.UnmarshalListOfMaps(resp.Items,  &liveEvent)
 	if err == nil {
 		return &liveEvent, nil
@@ -71,7 +70,14 @@ func getEventByID(i int) (*[]LiveEvent, error) {
 func putItem(liveEvent LiveEvent) error {
 	svc, err := getSession()
 
-	av, err := dynamodbattribute.MarshalMap(liveEvent)
+	//Generate new uuid and append it to liveEvent
+	uuid, err := newUUID()
+	if err != nil {
+		return err
+	}
+	uLiveEvent := ULiveEvent{uuid, liveEvent}
+
+	av, err := dynamodbattribute.MarshalMap(uLiveEvent)
 	if err != nil {
 		return err
 	}
