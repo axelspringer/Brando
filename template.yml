@@ -96,15 +96,3 @@ Resources:
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
       TableName: "BrandoTable"
-      GlobalSecondaryIndexes: 
-        - 
-          IndexName: "GlobalBrandoIndex"
-          KeySchema: 
-            - 
-              AttributeName: "DateEnd"
-              KeyType: "RANGE"
-          Projection: 
-            ProjectionType: "KEYS_ONLY"
-          ProvisionedThroughput: 
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
