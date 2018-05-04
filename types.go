@@ -2,7 +2,7 @@ package main
 
 //LiveEvent Struct
 type LiveEvent struct {
-	ID string`json:"ID"`
+	ID int`json:"ID"`
 	Titel string`json:"Titel"`
 	Presentor string`json:"Presentor"`
 	Description string`json:"Description"`
