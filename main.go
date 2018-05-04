@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strconv"
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -30,7 +29,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	var data []byte
 	var err error
 
-	if eventID, err := strconv.Atoi(request.PathParameters["event"]); err == nil {
+	if eventID := request.PathParameters["event"]; &eventID != nil {
 		item, err := getEventByID(eventID)
 		if err != nil {
 			err := Error{"Unexpected error", err.Error()}
