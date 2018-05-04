@@ -38,7 +38,7 @@ func scanDB() (*[]LiveEvent, error) {
 	return &obj, nil
 }
 
-func getEventByID(s string) (*[]LiveEvent, error) {
+func getEventByID(i int) (*[]LiveEvent, error) {
 	svc, err := getSession()
 
 	params := &dynamodb.QueryInput{
@@ -48,7 +48,7 @@ func getEventByID(s string) (*[]LiveEvent, error) {
 		   ComparisonOperator: aws.String("EQ"),
 			AttributeValueList:     []*dynamodb.AttributeValue{
 			   {
-				S: aws.String(s),
+				N: aws.String(string(i)),
 				},
 			  },
 			},
