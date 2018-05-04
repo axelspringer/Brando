@@ -102,7 +102,7 @@ Resources:
           KeySchema: 
             - 
               AttributeName: "DateEnd"
-              KeyType: "HASH"
+              KeyType: "RANGE"
           Projection: 
             ProjectionType: "KEYS_ONLY"
           ProvisionedThroughput: 
