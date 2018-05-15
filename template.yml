@@ -33,6 +33,11 @@ Resources:
           Properties:
             Path: /events/{event}
             Method: get
+        DeleteEvent:
+          Type: Api
+            Properties:
+            Path: /events/{event}
+            Method: delete
 
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy

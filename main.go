@@ -79,16 +79,14 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 }
 
-func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var liveEventID LiveEventID
-	
-	err := json.Unmarshal([]byte(request.Body), &liveEventID)
-	if err != nil {
-		fmt.Println(err.Error())
-		return clientError("Inconsistent input", 400)
+func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {	
+	eventID := request.PathParameters["event"]
+
+	if &eventID == nil || eventID != "" {
+		return clientError("You must use delete on an existing events uuid", 400)
 	}
 
-	if err = delItem(liveEventID.ID); err != nil {
+	if err := delItem(eventID); err != nil {
 		fmt.Println(err.Error())
 		return clientError("An unexpected error occured during put request", 400)
 	}
@@ -101,6 +99,9 @@ func clientError(errStr string, code int) (events.APIGatewayProxyResponse, error
     return events.APIGatewayProxyResponse{
         StatusCode: code,
         Body:       err.Error(),
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
     }, nil
 }
 
