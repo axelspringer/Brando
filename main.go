@@ -17,7 +17,9 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
     case http.MethodGet:
         return show(request)
     case http.MethodPost:
-        return create(request)
+		return create(request)
+	case http.MethodDelete:
+		return delete(request)
     default:
 		return clientError("Unsupported http method", 400)
     }
@@ -77,12 +79,28 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 }
 
+func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var liveEventID LiveEventID
+	
+	err := json.Unmarshal([]byte(request.Body), &liveEventID)
+	if err != nil {
+		fmt.Println(err.Error())
+		return clientError("Inconsistent input", 400)
+	}
+
+	if err = delItem(liveEventID.ID); err != nil {
+		fmt.Println(err.Error())
+		return clientError("An unexpected error occured during put request", 400)
+	}
+
+	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+}
+
 func clientError(errStr string, code int) (events.APIGatewayProxyResponse, error) {
 	err := errors.New(errStr)
-	data, _ := json.Marshal(err);
     return events.APIGatewayProxyResponse{
         StatusCode: code,
-        Body:       string(data),
+        Body:       err.Error(),
     }, nil
 }
 

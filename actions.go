@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -96,4 +98,34 @@ func putItem(liveEvent LiveEvent) error {
 	}
 
 	return nil
+}
+
+func delItem(eventID string) error {
+	item, err := getEventByID(eventID)
+	if len(*item) == 0 {
+		return errors.New("Item couldn't be found")
+	} 
+	if err != nil {
+		return err
+	}
+	
+	input := &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"ID": {
+				S: aws.String((*item)[0].ID),
+			},
+			"DateBegin": {
+				S: aws.String((*item)[0].DateBegin),
+			},
+		},
+		TableName: aws.String(defaultDynamoDBTable),
+	}
+	
+	_, err = dbService.DeleteItem(input)
+	
+	if err != nil {
+		return err
+	}
+	
+   return nil
 }
