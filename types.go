@@ -17,4 +17,9 @@ type LiveEvent struct {
 	Featured bool`json:"Featured"`
 }
 
+//LiveEventID struct
+type LiveEventID struct {
+	ID string`json:"ID"`
+}
+
 
