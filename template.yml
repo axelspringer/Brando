@@ -85,14 +85,14 @@ Resources:
           AttributeName: "ID"
           AttributeType: "S"
         - 
-          AttributeName: "date_begin"
+          AttributeName: "dateBegin"
           AttributeType: "S"
       KeySchema: 
         - 
           AttributeName: "ID"
           KeyType: "HASH"
         - 
-          AttributeName: "date_begin"
+          AttributeName: "dateBegin"
           KeyType: "RANGE"
       ProvisionedThroughput: 
         ReadCapacityUnits: "5"
