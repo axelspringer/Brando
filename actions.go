@@ -114,8 +114,8 @@ func delItem(eventID string) error {
 			"ID": {
 				S: aws.String((*item)[0].ID),
 			},
-			"dateBegin": {
-				S: aws.String((*item)[0].dateBegin),
+			"DateBegin": {
+				S: aws.String((*item)[0].DateBegin),
 			},
 		},
 		TableName: aws.String(defaultDynamoDBTable),

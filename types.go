@@ -8,13 +8,13 @@ type ULiveEvent struct {
 
 //LiveEvent struct
 type LiveEvent struct {
-	titel string`json:"titel"`
-	presentor string`json:"presentor"`
-	description string`json:"description"`
-    	dateBegin string`json:"dateBegin"`
-	dateEnd string`json:"dateEnd"`
-	live bool`json:"live"`
-	featured bool`json:"featured"`
+	Titel string`json:"titel"`
+	Presentor string`json:"presentor"`
+	Description string`json:"description"`
+    DateBegin string`json:"dateBegin"`
+	DateEnd string`json:"dateEnd"`
+	Live bool`json:"live"`
+	Featured bool`json:"featured"`
 }
 
 //LiveEventID struct

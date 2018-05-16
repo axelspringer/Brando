@@ -92,7 +92,7 @@ Resources:
           AttributeName: "ID"
           KeyType: "HASH"
         - 
-          AttributeName: "dateBegin"
+          AttributeName: "DateBegin"
           KeyType: "RANGE"
       ProvisionedThroughput: 
         ReadCapacityUnits: "5"

@@ -12,7 +12,7 @@ import (
 func TestHandler(t *testing.T) {
 
 	request := events.APIGatewayProxyRequest{}
-	data, _ := json.Marshal(LiveEvent{titel: "Awesome EventXXX", presentor: "Bob", description: "An awesome event I guess", dateBegin: "2018-05-01 12:00", dateEnd: "2018-05-01 12:30", live: true, featured: true })
+	data, _ := json.Marshal(LiveEvent{Titel: "Awesome EventXXX", Presentor: "Bob", Description: "An awesome event I guess", DateBegin: "2018-05-01 12:00", DateEnd: "2018-05-01 12:30", Live: true, Featured: true })
 	request.HTTPMethod = http.MethodPost
 	request.Body = string(data)
 	expectedResponse := events.APIGatewayProxyResponse{
