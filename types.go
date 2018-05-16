@@ -11,8 +11,8 @@ type LiveEvent struct {
 	titel string`json:"titel"`
 	presentor string`json:"presentor"`
 	description string`json:"description"`
-    	dateBegin string`json:"date_begin"`
-	dateEnd string`json:"date_end"`
+    	dateBegin string`json:"dateBegin"`
+	dateEnd string`json:"dateEnd"`
 	live bool`json:"live"`
 	featured bool`json:"featured"`
 }
