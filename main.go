@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -14,17 +14,16 @@ import (
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.HTTPMethod {
-    case http.MethodGet:
-        return show(request)
-    case http.MethodPost:
+	case http.MethodGet:
+		return show(request)
+	case http.MethodPost:
 		return create(request)
 	case http.MethodDelete:
 		return delete(request)
-    default:
+	default:
 		return clientError("Unsupported http method", 400)
-    }
+	}
 }
-
 
 func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var data []byte
@@ -51,7 +50,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 		fmt.Println(err.Error())
 		return clientError("An unexpected error occured while parsing", 500)
 	}
-	
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Body:       string(data),
@@ -63,7 +62,7 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 
 func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var liveEvent LiveEvent
-	
+
 	// Unmarshal request body to LiveEvent obj
 	err := json.Unmarshal([]byte(request.Body), &liveEvent)
 	if err != nil {
@@ -79,10 +78,10 @@ func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
 }
 
-func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {	
+func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	eventID := request.PathParameters["event"]
 
-	if &eventID == nil || eventID != "" {
+	if &eventID == nil || eventID == "" {
 		return clientError("You must use delete on an existing events uuid", 400)
 	}
 
@@ -96,13 +95,13 @@ func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 
 func clientError(errStr string, code int) (events.APIGatewayProxyResponse, error) {
 	err := errors.New(errStr)
-    return events.APIGatewayProxyResponse{
-        StatusCode: code,
-        Body:       err.Error(),
+	return events.APIGatewayProxyResponse{
+		StatusCode: code,
+		Body:       err.Error(),
 		Headers: map[string]string{
 			"Content-Type": "text/plain",
 		},
-    }, nil
+	}, nil
 }
 
 func main() {
