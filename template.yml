@@ -35,7 +35,7 @@ Resources:
             Method: get
         DeleteEvent:
           Type: Api
-            Properties:
+          Properties:
             Path: /events/{event}
             Method: delete
 
