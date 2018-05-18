@@ -1,15 +1,5 @@
 package main
 
-// import (
-// 	"encoding/json"
-// 	"net/http"
-
-// 	"testing"
-
-// 	"github.com/aws/aws-lambda-go/events"
-// 	"github.com/stretchr/testify/assert"
-// )
-
 // func TestHandler(t *testing.T) {
 // 	request := events.APIGatewayProxyRequest{}
 
@@ -38,7 +28,8 @@ package main
 // 		},
 // 	}
 
-// 	response := handler(request)
+// 	response, err := Handler(request)
 
-// 	assert.Contains(t, response.Body, expectedResponse)
+// 	assert.Contains(t, response.Body, expectedResponse.Body)
+// 	assert.Equal(t, err, nil)
 // }

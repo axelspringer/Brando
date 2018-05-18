@@ -8,13 +8,13 @@ type UniqueEvent struct {
 
 //Event ...
 type Event struct {
-	Titel       string `json:"titel"`
-	Presentor   string `json:"presentor"`
-	Description string `json:"description"`
-	StartDate   string `json:"startDate"`
-	EndDate     string `json:"endDate"`
-	Live        bool   `json:"live"`
-	Featured    bool   `json:"featured"`
+	Titel       string `json:"Titel"`
+	Presentor   string `json:"Presentor"`
+	Description string `json:"Description"`
+	StartDate   string `json:"StartDate"`
+	EndDate     string `json:"EndDate"`
+	Live        bool   `json:"Live"`
+	Featured    bool   `json:"Featured"`
 }
 
 //Msg ...

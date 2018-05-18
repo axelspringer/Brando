@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 // Handler is executed by AWS Lambda in the main function. Once the request
@@ -29,36 +29,36 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	var err error
 	var items *[]UniqueEvent
 
-	glog.Info("GET request on " + request.Path)
+	log.Info("GET request on " + request.Path)
 
 	if eventID := request.PathParameters["event"]; eventID != "" {
 
-		glog.Info("Selected event ID: " + eventID)
+		log.Info("Selected event ID: " + eventID)
 
 		items, err = getEventByID(eventID)
 
 		if err != nil {
-			glog.Error(err.Error())
+			log.Error(err.Error())
 			return sendMsg("Selected event couldn't be retrieved!", 500)
 		}
 	} else {
 
-		glog.Info("Retrieving events...")
+		log.Info("Retrieving events...")
 
 		items, err = getEvents()
 
 		if err != nil {
-			glog.Error(err.Error())
+			log.Error(err.Error())
 			return sendMsg("Events couldn't be retrieved!", 500)
 		}
 	}
 
-	glog.Info("JSON Marshal...")
+	log.Info("JSON Marshal...")
 
 	data, err := json.Marshal(items)
 
 	if err != nil {
-		glog.Error(err.Error())
+		log.Error(err.Error())
 		return sendMsg("Events coudln't be parsed!", 500)
 	}
 
@@ -75,16 +75,18 @@ func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 	var err error
 	var event Event
 
-	glog.Info("JSON Unmarshal...")
+	log.Info("JSON Unmarshal...")
 
 	if err = json.Unmarshal([]byte(request.Body), &event); err != nil {
-		glog.Error(err.Error())
+		log.Error(err.Error())
 		return sendMsg("Event couldn't be parsed!", 400)
 	}
 
+	log.Info("Putting event into database...")
+
 	if err = putEvent(event); err != nil {
-		glog.Error(err.Error())
-		glog.Error(event.StartDate)
+		log.Error(err.Error())
+		log.Error(event)
 		return sendMsg("Event couldn't be put into database!", 500)
 	}
 
@@ -96,14 +98,14 @@ func delete(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespons
 	eventID := request.PathParameters["event"]
 
 	if eventID == "" {
-		glog.Error("No event ID provided! " + eventID)
+		log.Error("No event ID provided! " + eventID)
 		return sendMsg("You must provide an event ID!", 400)
 	}
 
-	glog.Info("Deleting " + eventID + "...")
+	log.Info("Deleting " + eventID + "...")
 
 	if err = deleteEvent(eventID); err != nil {
-		glog.Error(err.Error())
+		log.Error(err.Error())
 		return sendMsg("Event couldn't be deleted!", 500)
 	}
 

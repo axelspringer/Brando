@@ -38,7 +38,7 @@ func getEvents() (*[]UniqueEvent, error) {
 	var err error
 
 	params := &dynamodb.ScanInput{
-		TableName: aws.String(defaultRegion),
+		TableName: aws.String(defaultTable),
 	}
 
 	result, err := dbService.Scan(params)
