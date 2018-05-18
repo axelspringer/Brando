@@ -9,16 +9,19 @@ import (
 	"github.com/golang/glog"
 )
 
-func handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+// Handler is executed by AWS Lambda in the main function. Once the request
+// is processed, it returns an Amazon API Gateway response object to AWS Lambda
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var err error
 	switch request.HTTPMethod {
 	case http.MethodGet:
-		return get(request)
+		return get(request), err
 	case http.MethodPost:
-		return post(request)
+		return post(request), err
 	case http.MethodDelete:
-		return delete(request)
+		return delete(request), err
 	default:
-		return sendMsg("Unsupported HTTP method!", 400)
+		return sendMsg("Unsupported HTTP method!", 400), err
 	}
 }
 
@@ -81,6 +84,7 @@ func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 
 	if err = putEvent(event); err != nil {
 		glog.Error(err.Error())
+		glog.Error(event.StartDate)
 		return sendMsg("Event couldn't be put into database!", 500)
 	}
 
@@ -121,5 +125,5 @@ func sendMsg(msg string, status int) events.APIGatewayProxyResponse {
 }
 
 func main() {
-	lambda.Start(handler)
+	lambda.Start(Handler)
 }
