@@ -39,6 +39,23 @@ Resources:
             Path: /events/{event}
             Method: delete
 
+  BrandoCFRolePolicy: 
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: !Join [ "-", [ !Ref ProjectId, "cf" ] ]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action:
+              - "iam:DeleteRolePolicy"
+              - "iam:PutRolePolicy"
+            Resource:
+              - "*"
+      Roles: 
+        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "CloudFormation" ] ]
+
   BrandoDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
     Properties: 
@@ -59,24 +76,6 @@ Resources:
       Roles: 
         - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "Lambda" ] ]
 
-
-  BrandoCFRolePolicy: 
-    Type: AWS::IAM::Policy
-    Properties: 
-      PolicyName: !Join [ "-", [ !Ref ProjectId, "cf" ] ]
-      PolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - 
-            Effect: "Allow"
-            Action:
-              - "iam:DeleteRolePolicy"
-              - "iam:PutRolePolicy"
-            Resource:
-              - "*"
-      Roles: 
-        - !Join [ "-", [ 'CodeStarWorker', !Ref ProjectId, "CloudFormation" ] ]
-
   BrandoDynamoDBTable: 
     Type: AWS::DynamoDB::Table
     Properties:
@@ -85,14 +84,14 @@ Resources:
           AttributeName: "ID"
           AttributeType: "S"
         - 
-          AttributeName: "DateBegin"
+          AttributeName: "StartDate"
           AttributeType: "S"
       KeySchema: 
         - 
           AttributeName: "ID"
           KeyType: "HASH"
         - 
-          AttributeName: "DateBegin"
+          AttributeName: "StartDate"
           KeyType: "RANGE"
       ProvisionedThroughput: 
         ReadCapacityUnits: "5"

@@ -15,6 +15,9 @@ phases:
       # Install Testify to use common assertions and mocks in tests
       - go get -u github.com/stretchr/testify
 
+      # Install logging tool
+      - go get -u ithub.com/golang/glog
+
   pre_build:
     commands:
 
@@ -39,7 +42,7 @@ phases:
       # Build our go application
       - go build -o main
 
-      # Copy static assets to S3, and package application with AWS CloudFormation/SAM
+      # Package application with AWS CloudFormation/SAM
       - aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template template-export.yml
 
 artifacts:
