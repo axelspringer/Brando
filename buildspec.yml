@@ -16,7 +16,7 @@ phases:
       - go get -u github.com/stretchr/testify
 
       # Install logging tool
-      - go get -u ithub.com/golang/glog
+      - go get -u github.com/golang/glog
 
   pre_build:
     commands:
