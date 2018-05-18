@@ -2,53 +2,61 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/golang/glog"
 )
 
-// Handler is executed by AWS Lambda in the main function. Once the request
-// is processed, it returns an Amazon API Gateway response object to AWS Lambda
-func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	switch request.HTTPMethod {
 	case http.MethodGet:
-		return show(request)
+		return get(request)
 	case http.MethodPost:
-		return create(request)
+		return post(request)
 	case http.MethodDelete:
 		return delete(request)
 	default:
-		return clientError("Unsupported http method", 400)
+		return sendMsg("Unsupported HTTP method!", 400)
 	}
 }
 
-func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var data []byte
+func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	var err error
+	var items *[]UniqueEvent
 
-	fmt.Println("GET request on " + request.Path + " event: " + request.PathParameters["event"] + ".")
-	if eventID := request.PathParameters["event"]; &eventID != nil && eventID != "" {
-		item, err := getEventByID(eventID)
+	glog.Info("GET request on " + request.Path)
+
+	if eventID := request.PathParameters["event"]; eventID != "" {
+
+		glog.Info("Selected event ID: " + eventID)
+
+		items, err = getEventByID(eventID)
+
 		if err != nil {
-			fmt.Println(err.Error())
-			return clientError("An unexpected error occured during query", 500)
+			glog.Error(err.Error())
+			return sendMsg("Selected event couldn't be retrieved!", 500)
 		}
-		data, err = json.Marshal(item)
 	} else {
-		obj, err := scanDB()
+
+		glog.Info("Retrieving events...")
+
+		items, err = getEvents()
+
 		if err != nil {
-			fmt.Println(err.Error())
-			return clientError("An unexpected error occured during scan", 500)
+			glog.Error(err.Error())
+			return sendMsg("Events couldn't be retrieved!", 500)
 		}
-		data, err = json.Marshal(obj)
 	}
 
+	glog.Info("JSON Marshal...")
+
+	data, err := json.Marshal(items)
+
 	if err != nil {
-		fmt.Println(err.Error())
-		return clientError("An unexpected error occured while parsing", 500)
+		glog.Error(err.Error())
+		return sendMsg("Events coudln't be parsed!", 500)
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -57,53 +65,61 @@ func show(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
-	}, nil
+	}
 }
 
-func create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var liveEvent LiveEvent
+func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	var err error
+	var event Event
 
-	// Unmarshal request body to LiveEvent obj
-	err := json.Unmarshal([]byte(request.Body), &liveEvent)
-	if err != nil {
-		fmt.Println(err.Error())
-		return clientError("Inconsistent input", 400)
+	glog.Info("JSON Unmarshal...")
+
+	if err = json.Unmarshal([]byte(request.Body), &event); err != nil {
+		glog.Error(err.Error())
+		return sendMsg("Event couldn't be parsed!", 400)
 	}
 
-	if err = putItem(liveEvent); err != nil {
-		fmt.Println(err.Error())
-		return clientError("An unexpected error occured during put request", 400)
+	if err = putEvent(event); err != nil {
+		glog.Error(err.Error())
+		return sendMsg("Event couldn't be put into database!", 500)
 	}
 
-	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+	return sendMsg("Success!", 200)
 }
 
-func delete(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func delete(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	var err error
 	eventID := request.PathParameters["event"]
 
-	if &eventID == nil || eventID == "" {
-		return clientError("You must use delete on an existing events uuid", 400)
+	if eventID == "" {
+		glog.Error("No event ID provided! " + eventID)
+		return sendMsg("You must provide an event ID!", 400)
 	}
 
-	if err := delItem(eventID); err != nil {
-		fmt.Println(err.Error())
-		return clientError("An unexpected error occured during put request", 400)
+	glog.Info("Deleting " + eventID + "...")
+
+	if err = deleteEvent(eventID); err != nil {
+		glog.Error(err.Error())
+		return sendMsg("Event couldn't be deleted!", 500)
 	}
 
-	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+	return sendMsg("Success!", 200)
 }
 
-func clientError(errStr string, code int) (events.APIGatewayProxyResponse, error) {
-	err := errors.New(errStr)
+func sendMsg(msg string, status int) events.APIGatewayProxyResponse {
+	data, _ := json.Marshal(Msg{
+		Message: msg,
+	})
+
 	return events.APIGatewayProxyResponse{
-		StatusCode: code,
-		Body:       err.Error(),
+		StatusCode: status,
+		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type": "text/plain",
+			"Content-Type": "application/json",
 		},
-	}, nil
+	}
 }
 
 func main() {
-	lambda.Start(Handler)
+	lambda.Start(handler)
 }

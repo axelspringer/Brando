@@ -1,56 +1,44 @@
 package main
 
-import (
-	"encoding/json"
-	"net/http"
+// import (
+// 	"encoding/json"
+// 	"net/http"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
+// 	"testing"
 
-func TestHandler(t *testing.T) {
+// 	"github.com/aws/aws-lambda-go/events"
+// 	"github.com/stretchr/testify/assert"
+// )
 
-	request := events.APIGatewayProxyRequest{}
-	data, _ := json.Marshal(LiveEvent{Titel: "Awesome EventXXX", Presentor: "Bob", Description: "An awesome event I guess", DateBegin: "2018-05-01 12:00", DateEnd: "2018-05-01 12:30", Live: true, Featured: true })
-	request.HTTPMethod = http.MethodPost
-	request.Body = string(data)
-	expectedResponse := events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Body: string(data),
-	}
+// func TestHandler(t *testing.T) {
+// 	request := events.APIGatewayProxyRequest{}
 
-	response, err := Handler(request)
+// 	data, _ := json.Marshal(Event{
+// 		Titel:       "TitelX1",
+// 		Presentor:   "PresentorX1",
+// 		Description: "DescriptionX1",
+// 		StartDate:   "StartDateX1",
+// 		EndDate:     "EndDateX1",
+// 		Live:        true,
+// 		Featured:    false,
+// 	})
 
-	assert.Contains(t, response.Body, expectedResponse.Body)
-	assert.Equal(t, err, nil)
+// 	request.HTTPMethod = http.MethodPost
+// 	request.Body = string(data)
 
-	// request = events.APIGatewayProxyRequest{}
-	// data, _ = json.Marshal(LiveEventID{ID: "52691d2f-e2da-426f-ac64-6d503edf90ea" })
-	// request.HTTPMethod = http.MethodDelete
-	// request.Body = string(data)
-	// expectedResponse = events.APIGatewayProxyResponse{
-	// 	StatusCode: 200,
-	// 	Body: string(data),
-	// }
+// 	responseBody, _ := json.Marshal(Msg{
+// 		Message: "Success!",
+// 	})
 
-	// response, err = Handler(request)
+// 	expectedResponse := events.APIGatewayProxyResponse{
+// 		StatusCode: 200,
+// 		Body:       string(responseBody),
+// 		Headers: map[string]string{
+// 			"Content-Type": "application/json",
+// 		},
+// 	}
 
-	// assert.Contains(t, response.Body, expectedResponse.Body)
-	// assert.Equal(t, err, nil)
+// 	response := handler(request)
 
-	// request = events.APIGatewayProxyRequest{}
-	// request.HTTPMethod = "GET"
-	// request.Path = "/events/1"
-	// request.Body = ""
-	// expectedResponse := events.APIGatewayProxyResponse{
-	// 	StatusCode: 200,
-	// 	Body: "GET",
-	// }
-
-	// response, err := Handler(request)
-	// fmt.Println(response.Body)
-	// assert.Contains(t, response.Body, expectedResponse.Body)
-	// assert.Equal(t, err, nil)
-
-}
+// 	assert.Contains(t, response.Body, expectedResponse)
+// }

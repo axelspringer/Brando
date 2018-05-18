@@ -3,129 +3,150 @@ package main
 import (
 	"errors"
 
-    "github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 const (
-	defaultDynamoDBTable = "BrandoTable"
-	defaultDynamoDBRegion = "eu-west-1"
+	defaultTable  = "BrandoTable"
+	defaultRegion = "eu-west-1"
 )
 
 var (
-	dbService,_ = getService()
+	dbService, _ = getService()
 )
 
 func getService() (*dynamodb.DynamoDB, error) {
+	var err error
+
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(defaultDynamoDBRegion)},
-	)
+		Region: aws.String(defaultRegion),
+	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	svc := dynamodb.New(sess)
 
 	return svc, err
 }
 
-func scanDB() (*[]ULiveEvent, error) {
+func getEvents() (*[]UniqueEvent, error) {
+	var err error
+
 	params := &dynamodb.ScanInput{
-		TableName: aws.String(defaultDynamoDBTable),
-		}
+		TableName: aws.String(defaultRegion),
+	}
 
 	result, err := dbService.Scan(params)
-	if err != nil {
-		return nil, err
-	} 
 
-	obj := []ULiveEvent{}
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &obj)
 	if err != nil {
 		return nil, err
 	}
 
-	return &obj, nil
+	events := []UniqueEvent{}
+
+	if err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &events); err != nil {
+		return nil, err
+	}
+
+	return &events, err
 }
 
-func getEventByID(s string) (*[]ULiveEvent, error) {
-	//Define query parameters, search by given ID
+func getEventByID(eventID string) (*[]UniqueEvent, error) {
+	var err error
+	events := []UniqueEvent{}
+
 	params := &dynamodb.QueryInput{
-		TableName: aws.String(defaultDynamoDBTable),
+		TableName: aws.String(defaultTable),
 		KeyConditions: map[string]*dynamodb.Condition{
-		 "ID": {
-		   ComparisonOperator: aws.String("EQ"),
-			AttributeValueList:     []*dynamodb.AttributeValue{
-			   {
-				S: aws.String(s),
+			"ID": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(eventID),
+					},
 				},
-			  },
 			},
-		   },
-		 }
-	resp, err := dbService.Query(params)
+		},
+	}
+
+	result, err := dbService.Query(params)
+
 	if err != nil {
 		return nil, err
-	} 
-	liveEvent := []ULiveEvent{}
-	err = dynamodbattribute.UnmarshalListOfMaps(resp.Items,  &liveEvent)
-	if err == nil {
-		return &liveEvent, nil
 	}
-	return nil, err
+
+	if err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &events); err != nil {
+		return nil, err
+	}
+
+	return &events, err
 }
 
-func putItem(liveEvent LiveEvent) error {
-	//Generate new uuid and append it to liveEvent
+func putEvent(event Event) error {
+	var err error
+	var uEvent UniqueEvent
 	uuid, err := newUUID()
+
 	if err != nil {
 		return err
 	}
-	uLiveEvent := ULiveEvent{uuid, liveEvent}
 
-	av, err := dynamodbattribute.MarshalMap(uLiveEvent)
+	uEvent = UniqueEvent{uuid, event}
+
+	item, err := dynamodbattribute.MarshalMap(uEvent)
+
 	if err != nil {
 		return err
 	}
 
 	input := &dynamodb.PutItemInput{
-		Item: av,
-		TableName: aws.String(defaultDynamoDBTable),
+		Item:      item,
+		TableName: aws.String(defaultTable),
 	}
-	
+
 	_, err = dbService.PutItem(input)
+
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }
 
-func delItem(eventID string) error {
+func deleteEvent(eventID string) error {
+	var err error
+
 	item, err := getEventByID(eventID)
+
 	if len(*item) == 0 {
-		return errors.New("Item couldn't be found")
-	} 
+		err = errors.New("Item couldn't be found")
+	}
 	if err != nil {
 		return err
 	}
-	
+
 	input := &dynamodb.DeleteItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"ID": {
 				S: aws.String((*item)[0].ID),
 			},
-			"DateBegin": {
-				S: aws.String((*item)[0].DateBegin),
+			"StartDate": {
+				S: aws.String((*item)[0].StartDate),
 			},
 		},
-		TableName: aws.String(defaultDynamoDBTable),
+		TableName: aws.String(defaultTable),
 	}
-	
+
 	_, err = dbService.DeleteItem(input)
-	
+
 	if err != nil {
 		return err
 	}
-	
-   return nil
+
+	return err
 }
