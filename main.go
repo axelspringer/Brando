@@ -20,6 +20,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return post(request), err
 	case http.MethodDelete:
 		return delete(request), err
+	case http.MethodPut:
+		return put(request), err
 	default:
 		return sendMsg("Unsupported HTTP method!", 400), err
 	}
@@ -28,10 +30,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	var err error
 	var items *[]UniqueEvent
+	var data []byte
 
 	log.Info("GET request on " + request.Path)
 
-	if eventID := request.PathParameters["event"]; eventID != "" {
+	eventID := request.PathParameters["event"]
+
+	if eventID != "" {
 
 		log.Info("Selected event ID: " + eventID)
 
@@ -55,7 +60,11 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 	log.Info("JSON Marshal...")
 
-	data, err := json.Marshal(items)
+	if eventID == "" {
+		data, err = json.Marshal(items)
+	} else {
+		data, err = json.Marshal((*items)[0])
+	}
 
 	if err != nil {
 		log.Error(err.Error())
@@ -84,7 +93,7 @@ func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 
 	log.Info("Putting event into database...")
 
-	if err = putEvent(event); err != nil {
+	if err = postEvent(event); err != nil {
 		log.Error(err.Error())
 		log.Error(event)
 		return sendMsg("Event couldn't be put into database!", 500)
@@ -107,6 +116,49 @@ func delete(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespons
 	if err = deleteEvent(eventID); err != nil {
 		log.Error(err.Error())
 		return sendMsg("Event couldn't be deleted!", 500)
+	}
+
+	return sendMsg("Success!", 200)
+}
+
+func put(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	var err error
+	var event Event
+
+	eventID := request.PathParameters["event"]
+
+	if eventID == "" {
+		log.Error("No event ID provided! " + eventID)
+		return sendMsg("You must provide an event ID!", 400)
+	}
+
+	items, err := getEventByID(eventID)
+
+	if err != nil || len(*items) == 0 {
+		log.Error(err.Error())
+		return sendMsg("Event doesn't exist!", 500)
+	}
+
+	log.Info("JSON Unmarshal...")
+
+	if err = json.Unmarshal([]byte(request.Body), &event); err != nil {
+		log.Error(err.Error())
+		return sendMsg("Event couldn't be parsed!", 400)
+	}
+
+	log.Info("Deleting old " + eventID + "...")
+
+	if err = deleteEvent(eventID); err != nil {
+		log.Error(err.Error())
+		return sendMsg("Event couldn't be deleted!", 500)
+	}
+
+	log.Info("Updating event...")
+
+	if err = putEvent(eventID, event); err != nil {
+		log.Error(err.Error())
+		log.Error(event)
+		return sendMsg("Event couldn't be updated!", 500)
 	}
 
 	return sendMsg("Success!", 200)
