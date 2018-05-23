@@ -87,7 +87,7 @@ func getEventByID(eventID string) (*[]UniqueEvent, error) {
 	return &events, err
 }
 
-func putEvent(event Event) error {
+func postEvent(event Event) error {
 	var err error
 	var uEvent UniqueEvent
 	uuid, err := newUUID()
@@ -143,6 +143,32 @@ func deleteEvent(eventID string) error {
 	}
 
 	_, err = dbService.DeleteItem(input)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func putEvent(eventID string, event Event) error {
+	var err error
+	var uEvent UniqueEvent
+
+	uEvent = UniqueEvent{eventID, event}
+
+	item, err := dynamodbattribute.MarshalMap(uEvent)
+
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.PutItemInput{
+		Item:      item,
+		TableName: aws.String(defaultTable),
+	}
+
+	_, err = dbService.PutItem(input)
 
 	if err != nil {
 		return err

@@ -38,6 +38,11 @@ Resources:
           Properties:
             Path: /events/{event}
             Method: delete
+        PutEvent:
+          Type: Api
+          Properties:
+            Path: /events/{event}
+            Method: put
 
   BrandoCFRolePolicy: 
     Type: AWS::IAM::Policy
