@@ -30,10 +30,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	var err error
 	var items *[]UniqueEvent
+	var data []byte
 
 	log.Info("GET request on " + request.Path)
 
-	if eventID := request.PathParameters["event"]; eventID != "" {
+	eventID := request.PathParameters["event"]
+
+	if eventID != "" {
 
 		log.Info("Selected event ID: " + eventID)
 
@@ -57,7 +60,11 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 	log.Info("JSON Marshal...")
 
-	data, err := json.Marshal(items)
+	if eventID == "" {
+		data, err = json.Marshal(items)
+	} else {
+		data, err = json.Marshal((*items)[0])
+	}
 
 	if err != nil {
 		log.Error(err.Error())
