@@ -3,11 +3,19 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"math/rand"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// Seed the default rand Source with current time to produce better random
+	// numbers used with splay
+	rand.Seed(time.Now().UnixNano())
+}
 
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
