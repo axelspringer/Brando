@@ -13,6 +13,9 @@ import (
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var err error
+	if request.HTTPMethod != http.MethodGet && !authorized(request) {
+		return sendMsg("Unauthorized", 401), err
+	}
 	switch request.HTTPMethod {
 	case http.MethodGet:
 		return get(request), err
@@ -25,6 +28,16 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	default:
 		return sendMsg("Unsupported HTTP method!", 400), err
 	}
+}
+
+func authorized(request events.APIGatewayProxyRequest) bool {
+	auth := request.Headers["Authorization"]
+
+	if auth == "YWRtaW46bWFzdGVyX3Bhc3N3b3Jk" {
+		return true
+	}
+
+	return false
 }
 
 func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -99,7 +112,7 @@ func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 		return sendMsg("Event couldn't be put into database!", 500)
 	}
 
-	return sendMsg("Success!", 200)
+	return sendMsg("Success!", 201)
 }
 
 func delete(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -161,7 +174,7 @@ func put(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		return sendMsg("Event couldn't be updated!", 500)
 	}
 
-	return sendMsg("Success!", 200)
+	return sendMsg("Success!", 201)
 }
 
 func sendMsg(msg string, status int) events.APIGatewayProxyResponse {

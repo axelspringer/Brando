@@ -1,6 +1,7 @@
 package main
 
 // import (
+// 	"encoding/base64"
 // 	"encoding/json"
 // 	"fmt"
 // 	"net/http"
@@ -21,10 +22,14 @@ package main
 // 		EndDate:     "Fri Jun 01 2018",
 // 		Live:        true,
 // 		Featured:    false,
+// 		Teaser:      "",
 // 	})
 
 // 	request.HTTPMethod = http.MethodPost
 // 	request.Body = string(data)
+// 	request.Headers = map[string]string{
+// 		"Authorization": base64.StdEncoding.EncodeToString([]byte("admin:master_password")),
+// 	}
 
 // 	responseBody, _ := json.Marshal(Msg{
 // 		Message: "Success!",
@@ -39,6 +44,8 @@ package main
 // 	}
 
 // 	response, err := Handler(request)
+
+// 	fmt.Println(response)
 
 // 	assert.Contains(t, response.Body, expectedResponse.Body)
 // 	assert.Equal(t, err, nil)
