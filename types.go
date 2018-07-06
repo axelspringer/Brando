@@ -16,6 +16,7 @@ type Event struct {
 	Live        bool   `json:"Live"`
 	Featured    bool   `json:"Featured"`
 	Teaser      string `json:"Teaser"`
+	Source      string `json:"Source"`
 }
 
 //Msg ...
