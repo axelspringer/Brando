@@ -15,7 +15,7 @@ package main
 // 	request := events.APIGatewayProxyRequest{}
 
 // 	data, _ := json.Marshal(Event{
-// 		Titel:       "TitelX1",
+// 		Title:       "TitleX1",
 // 		Presentor:   "PresentorX1",
 // 		Description: "DescriptionX1",
 // 		StartDate:   "Fri Jun 01 2018",
@@ -51,7 +51,7 @@ package main
 // 	assert.Equal(t, err, nil)
 
 // data, _ = json.Marshal(Event{
-// 	Titel:       "TitelX55",
+// 	Title:       "TitleX55",
 // 	Presentor:   "PresentorX2",
 // 	Description: "DescriptionX1",
 // 	StartDate:   "Fri Jun 01 2018",

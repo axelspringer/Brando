@@ -8,7 +8,7 @@ type UniqueEvent struct {
 
 //Event ...
 type Event struct {
-	Titel       string `json:"Titel"`
+	Title       string `json:"Title"`
 	Presentor   string `json:"Presentor"`
 	Description string `json:"Description"`
 	StartDate   string `json:"StartDate"`
