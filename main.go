@@ -41,7 +41,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 func authorized(request events.APIGatewayProxyRequest) bool {
 	auth := request.Headers["Authorization"]
 
-	if auth == "YWRtaW46bWFzdGVyX3Bhc3N3b3Jk" {
+	if auth == "YWRtaW46ZmlsaXBpbm8tZGl2YW4tbGlzdGluZy10ZW5waW4=" {
 		return true
 	}
 
