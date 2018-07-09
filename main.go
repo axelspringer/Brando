@@ -96,8 +96,8 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		StatusCode: 200,
 		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type":                 "application/json",
-			"Access-Control-Allow-Origin:": "*",
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
 		},
 	}
 }
@@ -195,8 +195,8 @@ func sendMsg(msg string, status int) events.APIGatewayProxyResponse {
 		StatusCode: status,
 		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type":                 "application/json",
-			"Access-Control-Allow-Origin:": "*",
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
 		},
 	}
 }
