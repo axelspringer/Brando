@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -96,7 +96,8 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		StatusCode: 200,
 		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type":                 "application/json",
+			"Access-Control-Allow-Origin:": "*",
 		},
 	}
 }
@@ -194,7 +195,8 @@ func sendMsg(msg string, status int) events.APIGatewayProxyResponse {
 		StatusCode: status,
 		Body:       string(data),
 		Headers: map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type":                 "application/json",
+			"Access-Control-Allow-Origin:": "*",
 		},
 	}
 }
