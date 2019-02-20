@@ -8,8 +8,36 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	log "github.com/sirupsen/logrus"
 )
+
+const (
+	defaultTable  = "BrandoTable"
+	defaultRegion = "eu-west-1"
+)
+
+var (
+	dbService, _ = getService()
+)
+
+func getService() (*dynamodb.DynamoDB, error) {
+	var err error
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(defaultRegion),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	svc := dynamodb.New(sess)
+
+	return svc, err
+}
 
 func init() {
 	// Seed the default rand Source with current time to produce better random
@@ -61,32 +89,33 @@ func get(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 		log.Info("Selected event ID: " + eventID)
 
-		items, err = getEventByID(eventID)
+		items, err = getEventByID(dbService, eventID)
 
 		if err != nil {
 			log.Error(err.Error())
 			return sendMsg("Selected event couldn't be retrieved!", 500)
 		}
+
+		data, err = json.Marshal((*items)[0])
 	} else {
 
 		log.Info("Retrieving events...")
 
-		items, err = getEvents()
+		if authorized(request) {
+			items, err = getAllEvents(dbService)
+		} else {
+			items, err = getEvents(dbService)
+		}
 
 		if err != nil {
 			log.Error(err.Error())
 			return sendMsg("Events couldn't be retrieved!", 500)
 		}
+
+		data, err = json.Marshal(items)
 	}
 
 	log.Info("JSON Marshal...")
-
-	if eventID == "" {
-		data, err = json.Marshal(items)
-	} else {
-		data, err = json.Marshal((*items)[0])
-	}
-
 	if err != nil {
 		log.Error(err.Error())
 		return sendMsg("Events coudln't be parsed!", 500)
@@ -115,7 +144,7 @@ func post(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 
 	log.Info("Putting event into database...")
 
-	if err = postEvent(event); err != nil {
+	if err = postEvent(dbService, event); err != nil {
 		log.Error(err.Error())
 		log.Error(event)
 		return sendMsg("Event couldn't be put into database!", 500)
@@ -135,7 +164,7 @@ func delete(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespons
 
 	log.Info("Deleting " + eventID + "...")
 
-	if err = deleteEvent(eventID); err != nil {
+	if err = deleteEvent(dbService, eventID); err != nil {
 		log.Error(err.Error())
 		return sendMsg("Event couldn't be deleted!", 500)
 	}
@@ -154,7 +183,7 @@ func put(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		return sendMsg("You must provide an event ID!", 400)
 	}
 
-	items, err := getEventByID(eventID)
+	items, err := getEventByID(dbService, eventID)
 
 	if err != nil || len(*items) == 0 {
 		log.Error(err.Error())
@@ -170,14 +199,14 @@ func put(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 	log.Info("Deleting old " + eventID + "...")
 
-	if err = deleteEvent(eventID); err != nil {
+	if err = deleteEvent(dbService, eventID); err != nil {
 		log.Error(err.Error())
 		return sendMsg("Event couldn't be deleted!", 500)
 	}
 
 	log.Info("Updating event...")
 
-	if err = putEvent(eventID, event); err != nil {
+	if err = putEvent(dbService, eventID, event); err != nil {
 		log.Error(err.Error())
 		log.Error(event)
 		return sendMsg("Event couldn't be updated!", 500)

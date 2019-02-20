@@ -17,6 +17,8 @@ type Event struct {
 	Featured    bool   `json:"Featured"`
 	Teaser      string `json:"Teaser"`
 	Source      string `json:"Source"`
+	Hidden      bool   `json:"Hidden"`
+	Password    string `json:"Password,omitempty"`
 }
 
 //Msg ...
