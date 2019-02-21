@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	defaultTable  = "BrandoTable"
+	defaultTable  = "BrandoTest"
 	defaultRegion = "eu-west-1"
 )
 

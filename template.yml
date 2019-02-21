@@ -101,4 +101,4 @@ Resources:
       ProvisionedThroughput: 
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
-      TableName: "BrandoTable"
+      TableName: "BrandoTest"
