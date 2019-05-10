@@ -1,0 +1,76 @@
+# Welcome to Brando!
+
+service: brando
+
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+custom:
+  defaultStage: dev
+  currentStage: ${opt:stage, self:custom.defaultStage}  
+  tableName: brando-${self:custom.currentStage}
+  tableThroughputs:
+    prod: 5
+    default: 1
+  tableThroughput: ${self:custom.tableThroughputs.${self:custom.currentStage}, self:custom.tableThroughputs.default} 
+  corsOrigin:
+    dev: '*'
+    prod: live.tortuga.cloud # your prod access-control-allow-origin header
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: eu-west-1 # chose your region
+  stage: ${self:custom.currentStage}
+  environment:
+      DB_NAME: ${self:custom.tableName}
+      DB_REGION: ${self:provider.region}
+      APP_STAGE: ${self:custom.currentStage}
+      CORS_ORIGIN: ${self:custom.corsOrigin.${self:custom.currentStage}}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [ BrandoTable, Arn ]
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  x:
+    handler: bin/brando
+    events:
+      - http:
+          path: /events
+          method: get
+      - http:
+          path: /events
+          method: post
+      - http:
+          path: /events/{event}
+          method: get
+      - http:
+          path: /events/{event}
+          method: delete
+      - http:
+          path: /events/{event}
+          method: put
+      - http:
+          path: '{proxy+}'
+          method: options   
+
+
+resources:
+  # DynamoDB
+  - ${file(./dynamo.yml)}
+
+
