@@ -14,7 +14,7 @@ custom:
   tableThroughput: ${self:custom.tableThroughputs.${self:custom.currentStage}, self:custom.tableThroughputs.default} 
   corsOrigin:
     dev: '*'
-    prod: 'live.tortuga.cloud; brando.tortuga.cloud' # your prod access-control-allow-origin header
+    prod: 'live.tortuga.cloud; brando.tortuga.services' # your prod access-control-allow-origin header
 
 provider:
   name: aws
