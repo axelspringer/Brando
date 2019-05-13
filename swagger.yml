@@ -1,0 +1,219 @@
+openapi: 3.0.0
+# No functionality, just an API documentation
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/TetsuyaXD/brando/1.0.0
+info:
+  description: This is brandos simple API
+  version: "1.0.0"
+  title: Brando API
+  contact:
+    email: jamie.kolles@axelspringer.de
+tags:
+  - name: loggedIn
+    description: only for authenticated users
+paths:
+  /events:
+    get:
+      security:
+        - basicAuth: []
+      summary: returns all events (optional authentication)
+      operationId: getAll
+      description: "all events are returned in an array, except the hidden ones if no authentication is provided"
+      responses:
+        200:
+          description: events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf: [
+                    {
+                    type: object,
+                    properties: {
+                      ID: {
+                        type: string,
+                        format: uuid
+                      }
+                    }
+                  },
+                  {
+                    $ref: "#/components/schemas/Event"
+                  }
+                ]
+    post:
+      tags:
+          - loggedIn
+      security:
+        - basicAuth: []
+      summary: creates a new event
+      operationId: postOne
+      description: creates a new event entry
+      responses:
+        200:
+          description: success
+        400:
+          description: bad request
+        401: 
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf: [
+                  {
+                    $ref: "#/components/schemas/Event"
+                  },
+                  {
+                    type: object,
+                    properties: {
+                      Password: {
+                        type: string
+                      }
+                    }
+                  },
+                ]
+  /events/{id}:
+    get:
+      tags:
+        - loggedIn
+      summary: returns event
+      operationId: getOne
+      description: returns the event corresponding to the given id
+      parameters:
+            - in: path
+              name: id   
+              required: true
+              schema:
+                type: string
+              description: event id
+            - in: query
+              name: code
+              schema:
+                type: string
+              description: a viewer code that may be required to view an event
+      responses:
+        200:
+          description: event retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        403:
+          description: provide viewer code
+        404: 
+          description: event not found
+    put:
+      security:
+        - basicAuth: []
+      tags:
+        - loggedIn
+      summary: updates an event
+      operationId: updateOne
+      description: updates the event corresponding to the given id
+      parameters:
+          - in: path
+            name: id   
+            required: true
+            schema:
+              type: string
+            description: event id
+      responses:
+        200:
+          description: event updated successfully
+        400: 
+          description: bad request
+        401: 
+          description: unauthorized
+        404: 
+          description: event not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf: [
+                  {
+                    $ref: "#/components/schemas/Event"
+                  },
+                  {
+                    type: object,
+                    properties: {
+                      Password: {
+                        type: string
+                      }
+                    }
+                  },
+                ]
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - loggedIn
+      summary: deletes an event
+      operationId: deleteOne
+      description: deletes the event corresponding to the given id
+      parameters:
+          - in: path
+            name: id   
+            required: true
+            schema:
+              type: string
+            description: event id
+      responses:
+        200:
+          description: event deleted successfully
+        401: 
+          description: unauthorized
+        404: 
+          description: event not found
+components:
+  securitySchemes:
+    basicAuth:    
+      type: http
+      scheme: basic
+  schemas:
+    Event:
+      type: object
+      required:
+        - Title
+        - Presentor
+        - Description
+        - StartDate
+        - EndDate
+        - Live
+        - Featured
+        - Teaser
+        - Source
+        - Hidden
+        - Password
+      properties:
+        Title:
+          type: string
+        Presentor:
+          type: string
+        Description:
+          type: string
+        StartDate:
+          type: string
+          format: "ISO 8601"
+          example: "2019-02-18T13:43:54.343Z"
+        EndDate:
+          type: string
+          format: "ISO 8601"
+          example: "2019-02-18T13:43:54.343Z"
+        Live:
+          type: boolean
+        Featured:
+          type: boolean
+        Teaser: 
+          type: string
+          format: base64
+          description: teaser image
+        Source: 
+          type: string
+          format: url
+        Hidden: 
+          type: boolean
+        Password:
+          type: string
