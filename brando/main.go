@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -19,7 +20,7 @@ var (
 	dbService, _  = getService()
 	defaultTable  = os.Getenv("DB_NAME")
 	defaultRegion = os.Getenv("DB_REGION")
-	corsOrigin    = os.Getenv("CORS_ORIGIN")
+	corsOrigin    string
 )
 
 func getService() (*dynamodb.DynamoDB, error) {
@@ -44,10 +45,25 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func validateOrigin(host string) string {
+	log.Info("Checking Host...")
+	originString := os.Getenv("CORS_ORIGIN")
+	origins := strings.Split(originString, "; ")
+	for _, domain := range origins {
+		if host == domain {
+			return domain
+		}
+	}
+	return origins[0]
+}
+
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var err error
+	log.Info("Starting...")
+	origin := request.Headers["Origin"]
+	corsOrigin = validateOrigin(origin)
 	if request.HTTPMethod == http.MethodOptions {
 		return methOptions(request), err
 	}
@@ -159,7 +175,6 @@ func methGet(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespon
 			log.Error(err.Error())
 			return sendMsg("Events couldn't be retrieved!", 500)
 		}
-
 		return sendJSON(fEvents)
 	}
 	uEvents, err := getEvents(dbService)
