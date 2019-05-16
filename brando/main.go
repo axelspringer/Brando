@@ -46,6 +46,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func getHeader(headers map[string]string, key string) string {
+	if val, ok := headers[key]; ok {
+		return val
+	}
+	strings.ToLower(key)
+	if val, ok := headers[key]; ok {
+		return val
+	}
+	return ""
+}
+
 func validateOrigin(origin string) string {
 	log.Info("Checking origin...")
 	originString := os.Getenv("CORS_ORIGIN")
@@ -62,12 +73,22 @@ func validateOrigin(origin string) string {
 	return origins[0]
 }
 
+func authorized(request events.APIGatewayProxyRequest) bool {
+	auth := getHeader(request.Headers, "Authorization")
+
+	if auth == "YWRtaW46ZmlsaXBpbm8tZGl2YW4tbGlzdGluZy10ZW5waW4=" {
+		return true
+	}
+
+	return false
+}
+
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var err error
 	log.Info("Starting...")
-	origin := request.Headers["Origin"]
+	origin := getHeader(request.Headers, "Origin")
 	corsOrigin = validateOrigin(origin)
 	if request.HTTPMethod == http.MethodOptions {
 		return methOptions(request), err
@@ -105,16 +126,6 @@ func sendJSON(v interface{}) events.APIGatewayProxyResponse {
 			"Access-Control-Allow-Origin": corsOrigin,
 		},
 	}
-}
-
-func authorized(request events.APIGatewayProxyRequest) bool {
-	auth := request.Headers["Authorization"]
-
-	if auth == "YWRtaW46ZmlsaXBpbm8tZGl2YW4tbGlzdGluZy10ZW5waW4=" {
-		return true
-	}
-
-	return false
 }
 
 func methGet(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
