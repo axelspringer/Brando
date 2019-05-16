@@ -47,10 +47,11 @@ func init() {
 }
 
 func getHeader(headers map[string]string, key string) string {
+
 	if val, ok := headers[key]; ok {
 		return val
 	}
-	strings.ToLower(key)
+	key = strings.ToLower(key)
 	if val, ok := headers[key]; ok {
 		return val
 	}
@@ -59,18 +60,22 @@ func getHeader(headers map[string]string, key string) string {
 
 func validateOrigin(origin string) string {
 	log.Info("Checking origin...")
+	var result string
 	originString := os.Getenv("CORS_ORIGIN")
 	origins := strings.Split(originString, "; ")
+	u, err := url.Parse(origin)
+	if err != nil {
+		result = origins[0]
+	}
 	for _, domain := range origins {
-		u, err := url.Parse(origin)
-		if err != nil {
-			return origins[0]
-		}
 		if u.Host == domain {
-			return domain
+			result = domain
 		}
 	}
-	return origins[0]
+	if result == "" {
+		result = origins[0]
+	}
+	return u.Scheme + "://" + result
 }
 
 func authorized(request events.APIGatewayProxyRequest) bool {
