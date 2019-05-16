@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -45,12 +46,16 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func validateOrigin(host string) string {
-	log.Info("Checking Host...")
+func validateOrigin(origin string) string {
+	log.Info("Checking origin...")
 	originString := os.Getenv("CORS_ORIGIN")
 	origins := strings.Split(originString, "; ")
 	for _, domain := range origins {
-		if host == domain {
+		u, err := url.Parse(origin)
+		if err != nil {
+			return origins[0]
+		}
+		if u.Host == domain {
 			return domain
 		}
 	}
