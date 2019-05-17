@@ -61,6 +61,7 @@ func getHeader(headers map[string]string, key string) string {
 func validateOrigin(origin string) string {
 	log.Info("Checking origin...")
 	var result string
+	var scheme string
 	originString := os.Getenv("CORS_ORIGIN")
 	origins := strings.Split(originString, "; ")
 	u, err := url.Parse(origin)
@@ -76,7 +77,10 @@ func validateOrigin(origin string) string {
 		result = origins[0]
 	}
 	if result != "*" {
-		result = u.Scheme + "://" + result
+		if u.Scheme != "" {
+			scheme = u.Scheme + "://"
+		}
+		result = scheme + result
 	}
 	return result
 }
