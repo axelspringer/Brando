@@ -75,7 +75,10 @@ func validateOrigin(origin string) string {
 	if result == "" {
 		result = origins[0]
 	}
-	return u.Scheme + "://" + result
+	if result != "*" {
+		result = u.Scheme + "://" + result
+	}
+	return result
 }
 
 func authorized(request events.APIGatewayProxyRequest) bool {
