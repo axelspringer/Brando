@@ -26,6 +26,16 @@ provider:
       DB_REGION: ${self:provider.region}
       APP_STAGE: ${self:custom.currentStage}
       CORS_ORIGIN: ${self:custom.corsOrigin.${self:custom.currentStage}}
+  resourcePolicy: 
+    - Effect: Allow
+      Principal: "*" 
+      Action: execute-api:Invoke 
+      Resource: 
+        - execute-api:/*
+      Condition: 
+        IpAddress: 
+          aws:SourceIp: 
+            - 145.243.200.0/16
   iamRoleStatements:
     - Effect: Allow
       Action:
